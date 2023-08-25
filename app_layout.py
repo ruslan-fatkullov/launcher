@@ -33,7 +33,6 @@ class AppLayout(Row):
         self.page = page
         self.page.on_resize = self.page_resize
         self.store: DataStore = store
-
         self.sidebar = Sidebar(self, store, page)
         self.all_boards_view = Column(
             [

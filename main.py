@@ -1,5 +1,7 @@
 from board import Board
 from app_layout import AppLayout
+import win32api
+from win32api import GetSystemMetrics
 from flet import (
     app,
     AlertDialog,
@@ -29,9 +31,9 @@ from dataXML import DataXML
 
 
 class LauncherApp(UserControl):
-    page_width = 2342
 
     def __init__(self, page: Page, store: DataStore, dataXML: DataXML):
+        self.page_width1 = page.window_width
         self.boards = None
         super().__init__()
         self.layout = None
@@ -176,10 +178,15 @@ def main(page: Page):
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
-    app = LauncherApp(page, InMemoryStore(), DataXML())
-    page.add(app)
+    page.window_width = GetSystemMetrics(0)
+    page.window_height = GetSystemMetrics(1)
+    page.window_maximized = True
+    print(page.window_width)
+    print(page.window_height)
+    application = LauncherApp(page, InMemoryStore(), DataXML())
+    page.add(application)
     page.update()
-    app.initialize()
+    application.initialize()
 
 
 app(target=main, assets_dir="../assets")

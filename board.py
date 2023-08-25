@@ -15,13 +15,12 @@ from flet import (
     icons,
     colors,
     padding,
-    margin,
     Page,
     FilePicker,
     FilePickerResultEvent,
     Icon,
     ScrollMode,
-    MainAxisAlignment
+    MainAxisAlignment,
 )
 from board_list import BoardList
 from data_store import DataStore
@@ -66,6 +65,7 @@ class Board(UserControl):
         self.dataXML = dataXML
         self.app = app
         self.board_name = name
+
         self.add_list_button = FloatingActionButton(
             icon=icons.ADD, text="добавить новый", height=30, on_click=self.create_list)
 
@@ -76,14 +76,12 @@ class Board(UserControl):
         self.list_grid = GridView(
             expand=1,
             runs_count=5,
-            max_extent=250,
+            max_extent=200,
             child_aspect_ratio=1.0,
             spacing=15,
             run_spacing=15,
-            padding=15,
-            # тут поменять значения
-            width=1900,
-            height=800
+            padding=padding.only(0, 10, 0,0),
+            width=self.page.window_width - 270,
         )
 
         launch_list = self.dataXML.get_launch_by_board_name(self.board_name)
@@ -107,10 +105,8 @@ class Board(UserControl):
                 expand=True
             ),
             data=self,
-            margin=margin.all(0),
-            padding=padding.only(top=10, right=0),
+            # border=border.all(1),
             # поменять тут
-            height=730
         )
         return self.view
 
@@ -213,7 +209,7 @@ class Board(UserControl):
         self.store.add_list(self.board_id, launch)
 
     def resize(self, page_width, page_height):
-        self.list_grid.width = page_width - 260
+        self.list_grid.width = page_width - 280
         self.list_grid.height = page_height - 95
         self.list_grid.update()
         self.view.update()
