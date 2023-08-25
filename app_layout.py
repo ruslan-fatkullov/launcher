@@ -1,9 +1,9 @@
+from board import Board
 from flet import (
     Control,
     Column,
     Page,
     Row,
-    Text,
     Container,
     padding,
     TextButton,
@@ -11,38 +11,42 @@ from flet import (
     ButtonStyle,
     colors,
     RoundedRectangleBorder,
-    AlertDialog,
     Text,
-    UserControl
+    MainAxisAlignment,
+    TextThemeStyle,
+    TextAlign,
+    PopupMenuButton,
+    PopupMenuItem,
+    alignment,
+    border_radius,
+    border
 )
-import flet as ft
 from data_store import DataStore
 from Sidebar import Sidebar
 
 
 class AppLayout(Row):
+
     def __init__(self, app, page: Page, store: DataStore, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = app
         self.page = page
+        self.page.on_resize = self.page_resize
         self.store: DataStore = store
+
         self.sidebar = Sidebar(self, store, page)
-        """"""
-        # self.item_list = SingleCartList(self, page, 2000)
-        # self.page.on_resize = self.item_list.page_resize(page)
-        """"""
         self.all_boards_view = Column(
             [
                 Row(
                     [
                         Container(
-                            Text(value="Your Boards", style="headlineMedium"),
+                            Text(value="Все группы", style=TextThemeStyle("headlineMedium")),
                             expand=True,
                             padding=padding.only(top=15),
                         ),
                         Container(
                             TextButton(
-                                "Add new board",
+                                "Добавить новую группу",
                                 icon=icons.ADD,
                                 on_click=self.app.add_board,
                                 style=ButtonStyle(
@@ -57,13 +61,13 @@ class AppLayout(Row):
                         ),
                     ]
                 ),
-                Row([Text("No Boards to Display")]),
+                Row([Text("Нет групп")]),
             ],
             expand=True
+
         )
 
         self._active_view: Control = self.all_boards_view
-
         self.controls = [self.sidebar, self.active_view]
 
     @property
@@ -75,7 +79,7 @@ class AppLayout(Row):
         self._active_view = view
         self.controls[-1] = self._active_view
         self.sidebar.sync_board_destinations()
-        self.page.update()
+        # self.app.page.update()
 
     def hydrate_all_boards_view(self):
         self.all_boards_view.controls[-1] = Row(
@@ -89,15 +93,17 @@ class AppLayout(Row):
                                 expand=True,
                                 padding=padding.only(left=10),
                                 on_click=self.board_click,
+                                height=150,
+                                alignment=alignment.center
                             ),
                             Container(
-                                content=ft.PopupMenuButton(
+                                content=PopupMenuButton(
                                     items=[
-                                        ft.PopupMenuItem(
+                                        PopupMenuItem(
                                             content=Text(
-                                                value="Delete",
-                                                style="labelMedium",
-                                                text_align="center",
+                                                value="Удалить",
+                                                style=TextThemeStyle("labelMedium"),
+                                                text_align=TextAlign("center"),
                                             ),
                                             on_click=self.app.delete_board,
                                             data=b,
@@ -105,16 +111,17 @@ class AppLayout(Row):
                                     ]
                                 ),
                                 padding=padding.only(left=10),
-                                border_radius=ft.border_radius.all(3),
+                                border_radius=border_radius.all(3),
                             ),
                         ],
-                        alignment="spaceBetween",
+                        alignment=MainAxisAlignment("spaceBetween"),
                     ),
-                    border=ft.border.all(1, colors.BLACK38),
-                    border_radius=ft.border_radius.all(5),
+                    border=border.all(1, colors.BLACK38),
+                    border_radius=border_radius.all(5),
                     bgcolor=colors.WHITE60,
                     padding=padding.all(10),
                     width=250,
+                    height=150,
                     data=b,
                 )
                 for b in self.store.get_boards()
@@ -124,27 +131,26 @@ class AppLayout(Row):
         self.sidebar.sync_board_destinations()
 
     def board_click(self, e):
-        self.sidebar.board_link(self.store.get_boards().index(e.control.data), e.page)
+        self.sidebar.bottom_nav_change(e)
+        self.page_resize(e)
 
-    def set_all_boards_view(self):
+    def set_all_boards_view(self, e):
         self.active_view = self.all_boards_view
         self.hydrate_all_boards_view()
         self.sidebar.top_nav_rail.selected_index = 0
         self.sidebar.bottom_nav_rail.selected_index = None
-        self.sidebar.update()
-        self.page.update()
+        e.update()
 
-    def set_board_view(self, i):
+    def set_board_view(self, e, i):
         self.active_view = self.store.get_boards()[i]
         self.sidebar.bottom_nav_rail.selected_index = i
         self.sidebar.top_nav_rail.selected_index = None
-        self.sidebar.update()
-        self.page.update()
+        e.page.update()
 
-    # def set_board_view(self, i, page):
-    #     self.page = page
-    #     self.active_view = self.store.get_boards()[i]
-    #     self.sidebar.bottom_nav_rail.selected_index = i
-    #     self.sidebar.top_nav_rail.selected_index = None
-    #     self.sidebar.update()
-    #     page.update()
+    def page_resize(self, e=None):
+        """тут проблема _active_view Column а не Board"""
+        if type(self.active_view) is Board:
+            self.active_view.resize(
+                e.page.width, e.page.height
+            )
+        e.page.update()

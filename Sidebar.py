@@ -12,10 +12,15 @@ from flet import (
     icons,
     padding,
     margin,
+    NavigationRailLabelType,
+    BoxShadow,
+    ShadowBlurStyle,
+    Offset,
+    InputBorder,
+    TextAlign,
+    Icon
 )
-import flet as ft
 from flet_core import TextField
-
 from data_store import DataStore
 
 
@@ -38,7 +43,7 @@ class Sidebar(UserControl):
         ]
         self.top_nav_rail = NavigationRail(
             selected_index=None,
-            label_type="all",
+            label_type=NavigationRailLabelType("all"),
             on_change=self.top_nav_change,
             destinations=self.top_nav_items,
             bgcolor=colors.GREY_200,
@@ -47,7 +52,7 @@ class Sidebar(UserControl):
         )
         self.bottom_nav_rail = NavigationRail(
             selected_index=None,
-            label_type="all",
+            label_type=NavigationRailLabelType("all"),
             on_change=self.bottom_nav_change,
             extended=True,
             expand=True,
@@ -83,12 +88,12 @@ class Sidebar(UserControl):
             margin=margin.all(0),
             width=250,
             bgcolor=colors.GREY_200,
-            shadow=ft.BoxShadow(
+            shadow=BoxShadow(
                 spread_radius=0,
                 blur_radius=15,
-                color=ft.colors.BLACK,
-                offset=ft.Offset(0, 0),
-                blur_style=ft.ShadowBlurStyle.OUTER
+                color=colors.BLACK,
+                offset=Offset(0, 0),
+                blur_style=ShadowBlurStyle.OUTER
             )
         )
         return self.view
@@ -100,22 +105,24 @@ class Sidebar(UserControl):
             b = boards[i]
             self.bottom_nav_rail.destinations.append(
                 NavigationRailDestination(
-                    label_content=TextField(
-                        value=b.board_name,
-                        hint_text=b.board_name,
-                        text_size=12,
-                        read_only=True,
-                        # on_focus=self.board_name_focus,
-                        # on_blur=self.board_name_blur,
-                        border="none",
-                        height=50,
-                        width=150,
-                        text_align="start",
-                        data=i
-                    ),
+                    label_content=Row([
+                        TextField(
+                            value=b.board_name,
+                            hint_text=b.board_name,
+                            text_size=12,
+                            read_only=True,
+                            on_focus=self.board_name_focus,
+                            on_blur=self.board_name_blur,
+                            border=InputBorder("none"),
+                            height=50,
+                            width=150,
+                            text_align=TextAlign("start"),
+                            data=i
+                        )
+                    ]),
                     label=b.board_name,
                     selected_icon=icons.CHEVRON_RIGHT_ROUNDED,
-                    icon=icons.ARROW_RIGHT
+                    icon=icons.ARROW_RIGHT,
                 )
             )
         self.view.update()
@@ -130,17 +137,26 @@ class Sidebar(UserControl):
         e.page.update()
 
     def bottom_nav_change(self, e):
-        index = e if (type(e) == int) else e.control.selected_index
+        try:
+            index = e.control.selected_index
+        except AttributeError:
+            index = self.store.get_boards().index(e.control.data)
         self.top_nav_rail.selected_index = None
         self.bottom_nav_rail.selected_index = index
-        e.page.route = f"/board/{index}"
         self.view.update()
+        e.page.route = f"/board/{index}"
         e.page.update()
 
-    # def board_link(self, e, page):
-    #     index = e if (type(e) == int) else e.control.selected_index
-    #     self.top_nav_rail.selected_index = None
-    #     self.bottom_nav_rail.selected_index = index
-    #     page.route = f"/board/{index}"
-    #     self.view.update()
-    #     page.update()
+    def board_name_blur(self, e):
+        self.store.update_board(self.store.get_boards()[e.control.data], {
+            'name': e.control.value})
+        self.app_layout.hydrate_all_boards_view()
+        e.control.read_only = True
+        e.control.border = "none"
+        e.page.update()
+
+    def board_name_focus(self, e):
+        e.control.read_only = False
+        e.control.border = "outline"
+        e.control.update()
+        self.view.update()

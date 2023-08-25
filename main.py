@@ -1,9 +1,7 @@
-import flet
-import self as self
 from board import Board
-
 from app_layout import AppLayout
 from flet import (
+    app,
     AlertDialog,
     AppBar,
     Column,
@@ -21,24 +19,32 @@ from flet import (
     margin,
     padding,
     theme,
+    IconButton,
+    Image,
+    MainAxisAlignment
 )
 from data_store import DataStore
 from memory_store import InMemoryStore
+from dataXML import DataXML
 
 
 class LauncherApp(UserControl):
-    def __init__(self, page: Page, store: DataStore):
+    page_width = 2342
+
+    def __init__(self, page: Page, store: DataStore, dataXML: DataXML):
+        self.boards = None
         super().__init__()
+        self.layout = None
         self.store: DataStore = store
         self.page = page
+        self.dataXML = dataXML
         self.page.on_route_change = self.route_change
-        self.boards = self.store.get_boards()
-
+        self.dataXML.get_groups()
         self.appbar_items = [
-            flet.IconButton(icon=icons.CLOSE)
+            IconButton(icon=icons.CLOSE)
         ]
         self.appbar = AppBar(
-            leading=flet.Image(src='./assets/esvologo.png'),
+            leading=Image(src='assets/application_logo.png'),
             leading_width=300,
             title=Text(f"Лаунчер", font_family="Roboto", size=32),
             center_title=True,
@@ -47,10 +53,9 @@ class LauncherApp(UserControl):
             color=colors.WHITE,
             actions=[
                 Container(
-                    content=flet.Row([
-                        flet.IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK, on_click=lambda e: page.window_maximized),
-                        flet.IconButton(icon=icons.CLOSE, on_click=lambda e: page.window_close()),
-                        # flet.IconButton(icon=icons.ADD, on_click=self.add_board),
+                    content=Row([
+                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK, on_click=lambda e: page.window_maximized),
+                        IconButton(icon=icons.CLOSE, on_click=lambda e: page.window_close()),
                     ]),
                     margin=margin.only(left=50, right=25),
                 )
@@ -71,6 +76,11 @@ class LauncherApp(UserControl):
         return self.layout
 
     def initialize(self):
+
+        for data_element in self.dataXML.root.findall("board"):
+            self.create_new_board(data_element.get("name"))
+
+        self.boards = self.store.get_boards()
         self.page.views.clear()
         self.page.views.append(
             View(
@@ -83,39 +93,40 @@ class LauncherApp(UserControl):
                 bgcolor=colors.BLUE_GREY_200,
             )
         )
-        self.page.update()
-        # if len(self.boards) == 0:
-        #     self.create_new_board("My First Board")
-        # self.page.go("/")
+        if len(self.boards) == 0:
+            self.dataXML.add_group(3, "Основная")
+            self.create_new_board("Основная")
+        self.page.go("/")
 
     def route_change(self, e):
-        troute = TemplateRoute(e.page.route)
-        if troute.match("/"):
+        routing = TemplateRoute(e.page.route)
+        if routing.match("/"):
             e.page.go("/boards")
-        elif troute.match("/board/:id"):
-            if int(troute.id) > len(self.store.get_boards()):
+        elif routing.match("/board/:id"):
+            if int(routing.id) > len(self.store.get_boards()):
                 self.page.go("/")
                 return
-            self.layout.set_board_view(int(troute.id))
-        elif troute.match("/boards"):
-            self.layout.set_all_boards_view()
+            self.layout.set_board_view(e, int(routing.id))
+        elif routing.match("/boards"):
+            self.layout.set_all_boards_view(e.page)
         e.page.update()
 
     def add_board(self, e):
-        def close_dlg(e):
-            if (hasattr(e.control, "text") and not e.control.text == "Cancel") or (
-                    type(e.control) is TextField and e.control.value != ""
+        def close_dlg(event):
+            if (hasattr(event.control, "text") and not event.control.text == "Закрыть") or (
+                    type(event.control) is TextField and event.control.value != ""
             ):
-                self.create_new_board(dialog_text.value, e.page)
+                self.dataXML.add_group(3, dialog_text.value)
+                self.create_new_board(dialog_text.value)
             dialog.open = False
-            e.page.update()
+            event.page.update()
 
-        def textfield_change(e):
+        def textfield_change(event):
             if dialog_text.value == "":
                 create_button.disabled = True
             else:
                 create_button.disabled = False
-            e.page.update()
+            event.page.update()
 
         dialog_text = TextField(
             label="Название группы", on_submit=close_dlg, on_change=textfield_change
@@ -133,43 +144,42 @@ class LauncherApp(UserControl):
                             ElevatedButton(text="Закрыть", on_click=close_dlg),
                             create_button,
                         ],
-                        alignment="spaceBetween",
+                        alignment=MainAxisAlignment.SPACE_BETWEEN,
                     ),
                 ],
                 tight=True,
             ),
-            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+            on_dismiss=lambda dismiss: print("Modal dialog dismissed!"),
         )
         e.page.dialog = dialog
         dialog.open = True
         e.page.update()
         dialog_text.focus()
 
-    def create_new_board(self, board_name, page):
-        new_board = Board(self, self.store, board_name, page)
+    def create_new_board(self, board_name):
+        new_board = Board(self, self.store, board_name, self.page, self.dataXML)
         self.store.add_board(new_board)
         self.layout.hydrate_all_boards_view()
 
     def delete_board(self, e):
+        self.dataXML.remove_group(e.control.data.board_name)
         self.store.remove_board(e.control.data)
-        self.layout.set_all_boards_view()
+        self.layout.set_all_boards_view(e.page)
 
 
-def main(page: flet.Page):
+def main(page: Page):
     page.title = "Flet Launcher App"
     # page.window_frameless = True
     # page.window_resizable = True
     # page.window_full_screen = True
-
     page.padding = 0
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
-    page.bgcolor = colors.BLUE_GREY_200
-    app = LauncherApp(page, InMemoryStore())
+    app = LauncherApp(page, InMemoryStore(), DataXML())
     page.add(app)
     page.update()
     app.initialize()
 
 
-flet.app(target=main, assets_dir="../assets")
+app(target=main, assets_dir="../assets")
