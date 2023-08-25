@@ -23,7 +23,8 @@ from flet import (
     theme,
     IconButton,
     Image,
-    MainAxisAlignment
+    MainAxisAlignment,
+    AppView
 )
 from data_store import DataStore
 from memory_store import InMemoryStore
@@ -33,7 +34,6 @@ from dataXML import DataXML
 class LauncherApp(UserControl):
 
     def __init__(self, page: Page, store: DataStore, dataXML: DataXML):
-        self.page_width1 = page.window_width
         self.boards = None
         super().__init__()
         self.layout = None
@@ -168,6 +168,9 @@ class LauncherApp(UserControl):
         self.store.remove_board(e.control.data)
         self.layout.set_all_boards_view(e.page)
 
+    # def setNewWidth(self, board):
+    #     board.resize(self.page.window_width, self.page.window_height)
+
 
 def main(page: Page):
     page.title = "Flet Launcher App"
@@ -178,9 +181,9 @@ def main(page: Page):
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
-    page.window_width = GetSystemMetrics(0)
-    page.window_height = GetSystemMetrics(1)
-    page.window_maximized = True
+    page.window_width = 1233#GetSystemMetrics(0)
+    page.window_height = 433#GetSystemMetrics(1)
+    # page.window_maximized = True
     print(page.window_width)
     print(page.window_height)
     application = LauncherApp(page, InMemoryStore(), DataXML())

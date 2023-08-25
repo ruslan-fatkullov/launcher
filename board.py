@@ -80,8 +80,8 @@ class Board(UserControl):
             child_aspect_ratio=1.0,
             spacing=15,
             run_spacing=15,
-            padding=padding.only(0, 10, 0,0),
-            width=self.page.window_width - 270,
+            padding=padding.only(0, 10, 0, 0),
+            width=self.page.window_width - 290,
         )
 
         launch_list = self.dataXML.get_launch_by_board_name(self.board_name)
@@ -94,6 +94,9 @@ class Board(UserControl):
             self.add_list(new_list)
 
         self.list_grid.controls = self.board_lists
+        self.page.on_resize = self.resize
+        # подумать
+        # self.page.on_resize = self.app.setNewWidth(self)
 
     def build(self):
         self.view = Container(
@@ -208,8 +211,8 @@ class Board(UserControl):
         self.board_lists.insert(-1, launch)
         self.store.add_list(self.board_id, launch)
 
-    def resize(self, page_width, page_height):
-        self.list_grid.width = page_width - 280
-        self.list_grid.height = page_height - 95
+    def resize(self, e):
+        self.list_grid.width = e.page.window_width - 290
+        self.list_grid.height = e.page.window_height - 95
         self.list_grid.update()
         self.view.update()
