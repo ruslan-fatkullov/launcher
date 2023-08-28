@@ -23,6 +23,7 @@ from flet import (
     Icon,
     ScrollMode,
     MainAxisAlignment,
+    TextButton
 )
 from board_list import BoardList
 from data_store import DataStore
@@ -219,18 +220,18 @@ class Board(UserControl):
         def close_dlg(event):
             if (hasattr(event.control, "text") and not event.control.text == "Закрыть") or (
                     type(event.control) is TextField and event.control.value != ""):
-                # os.remove(f"./assets/resized_image/{launch.launch_id}.png")
+                index = self.board_lists.index(launch)
                 new_image_path = generate_resized_image(image_path.value, launch.launch_id)
                 self.dataXML.edit_launch_item(self.unique_id, launch.launch_id, launch_name.value, launch_description.value, file_path.value, new_image_path)
-                launch.title = launch_name
                 new_list = BoardList(self, self.store, launch.launch_id, launch_name.value, launch_description.value,
                                      file_path.value, new_image_path)
-                self.board_lists.remove(launch)
-                self.add_list(new_list)
+                self.board_lists[index] = new_list
+
             dialog.open = False
+            self.view.update()
+            self.board_lists[index].view.update()
             self.page.update()
             self.update()
-            launch.update()
 
         def textfield_change(e=None):
             if launch_name.value == "" or selected_files.value is None or selected_image.value is None:

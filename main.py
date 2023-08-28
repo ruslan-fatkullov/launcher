@@ -179,13 +179,13 @@ def main(page: Page):
     page.title = "Flet Launcher App"
     # page.window_frameless = True
     # page.window_resizable = True
-    # page.window_full_screen = True
+    page.window_full_screen = True
     page.padding = 0
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
-    page.window_width = 1233#GetSystemMetrics(0)
-    page.window_height = 433#GetSystemMetrics(1)
+    page.window_width = GetSystemMetrics(0)
+    page.window_height = GetSystemMetrics(1)
     # page.window_maximized = True
     print(page.window_width)
     print(page.window_height)
