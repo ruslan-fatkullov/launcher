@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 import subprocess
+
 # from dataXML import DataXML
 if TYPE_CHECKING:
     from board import Board
@@ -32,26 +33,34 @@ from flet import (
     Offset,
     ShadowBlurStyle,
     Stack,
+    FilePickerResultEvent,
+    FilePicker,
+    ElevatedButton,
+    AlertDialog,
+    Column,
+    MainAxisAlignment
 )
 from data_store import DataStore
 from dataXML import DataXML
 
+
 class BoardList(UserControl):
     id_counter = itertools.count()
 
-    def __init__(self, board: "Board", store: DataStore, title: str, description: str = "", file_path: str = "",
+    def __init__(self, board: "Board", store: DataStore, launch_id: str, title: str, description: str = "",
+                 file_path: str = "",
                  image_path: str = ""):
         super().__init__()
         self.my_header = None
         self.image = None
         self.view = None
         self.inner_list = None
-        self.header = None
         self.end_indicator = None
         self.edit_field = None
         self.board_list_id = next(BoardList.id_counter)
         self.store: DataStore = store
         self.board = board
+        self.launch_id = launch_id
         self.title = title
         self.desc = description
         self.file_path = file_path
@@ -65,11 +74,6 @@ class BoardList(UserControl):
             width=200,
             opacity=0.0
         )
-        self.edit_field = Row([
-            TextField(value=self.title, width=150, height=40,
-                      content_padding=padding.only(left=10, bottom=10)),
-            TextButton(text="Save", on_click=self.save_title)
-        ])
         self.my_header = Container(
             Stack(
                 controls=[
@@ -92,7 +96,7 @@ class BoardList(UserControl):
                                 PopupMenuItem(
                                     content=Text(value="Редактировать", style=TextThemeStyle("labelMedium"),
                                                  text_align=TextAlign("center"), color=colors.BLACK),
-                                    on_click=self.edit_title),
+                                    on_click=self.edit_launch),
                                 PopupMenuItem(),
                                 PopupMenuItem(
                                     content=Text(value="Удалить", style=TextThemeStyle("labelMedium"),
@@ -202,17 +206,8 @@ class BoardList(UserControl):
     def delete_list(self, e):
         self.board.remove_list(self)
 
-    def edit_title(self, e):
-        self.header.controls[0] = self.edit_field
-        self.header.controls[1].visible = False
-        self.update()
-
-    def save_title(self, e):
-        self.title = self.edit_field.controls[0].value
-        self.header.controls[0] = Text(value=self.title, style=TextThemeStyle("titleMedium"),
-                                       text_align=TextAlign("left"), overflow=TextOverflow("clip"), expand=True)
-        self.header.controls[1].visible = True
-        self.update()
+    def edit_launch(self, e):
+        self.board.edit_launch(self)
 
     def play_launch(self, e):
         subprocess.Popen(('start', "", self.file_path), shell=True)

@@ -31,6 +31,7 @@ class AppLayout(Row):
         super().__init__(*args, **kwargs)
         self.app = app
         self.page = page
+        self.page.on_resize = self.page_resize
         self.store: DataStore = store
         self.sidebar = Sidebar(self, store, page)
         self.all_boards_view = Column(
@@ -145,10 +146,10 @@ class AppLayout(Row):
         self.sidebar.top_nav_rail.selected_index = None
         e.page.update()
 
-    # def page_resize(self, e=None):
-    #     """тут проблема _active_view Column а не Board"""
-    #     if type(self.active_view) is Board:
-    #         self.active_view.resize(
-    #             e.page.width, e.page.height
-    #         )
-    #     e.page.update()
+    def page_resize(self, e=None):
+        """тут проблема _active_view Column а не Board"""
+        if type(self.active_view) is Board:
+            self.active_view.resize(
+                e.page.width, e.page.height
+            )
+        e.page.update()

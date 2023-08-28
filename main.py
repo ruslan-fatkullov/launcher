@@ -1,5 +1,6 @@
 from board import Board
 from app_layout import AppLayout
+import uuid
 import win32api
 from win32api import GetSystemMetrics
 from flet import (
@@ -80,7 +81,7 @@ class LauncherApp(UserControl):
     def initialize(self):
 
         for data_element in self.dataXML.root.findall("board"):
-            self.create_new_board(data_element.get("name"))
+            self.create_new_board(data_element.get("id"), data_element.get("name"))
 
         self.boards = self.store.get_boards()
         self.page.views.clear()
@@ -96,8 +97,9 @@ class LauncherApp(UserControl):
             )
         )
         if len(self.boards) == 0:
-            self.dataXML.add_group(3, "Основная")
-            self.create_new_board("Основная")
+            unique_id = uuid.uuid4()
+            self.dataXML.add_group(unique_id, "Основная")
+            self.create_new_board(unique_id, "Основная")
         self.page.go("/")
 
     def route_change(self, e):
@@ -118,8 +120,9 @@ class LauncherApp(UserControl):
             if (hasattr(event.control, "text") and not event.control.text == "Закрыть") or (
                     type(event.control) is TextField and event.control.value != ""
             ):
-                self.dataXML.add_group(3, dialog_text.value)
-                self.create_new_board(dialog_text.value)
+                unique_id = uuid.uuid4()
+                self.dataXML.add_group(unique_id, dialog_text.value)
+                self.create_new_board(unique_id, dialog_text.value)
             dialog.open = False
             event.page.update()
 
@@ -158,13 +161,13 @@ class LauncherApp(UserControl):
         e.page.update()
         dialog_text.focus()
 
-    def create_new_board(self, board_name):
-        new_board = Board(self, self.store, board_name, self.page, self.dataXML)
+    def create_new_board(self, unique_id, board_name):
+        new_board = Board(self, self.store, unique_id, board_name, self.page, self.dataXML)
         self.store.add_board(new_board)
         self.layout.hydrate_all_boards_view()
 
     def delete_board(self, e):
-        self.dataXML.remove_group(e.control.data.board_name)
+        self.dataXML.remove_group(e.control.data.unique_id)
         self.store.remove_board(e.control.data)
         self.layout.set_all_boards_view(e.page)
 
