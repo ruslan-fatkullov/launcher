@@ -18,9 +18,12 @@ from flet import (
     Offset,
     InputBorder,
     TextAlign,
-    Icon
+    ListView,
+    FloatingActionButton,
+    TextButton
 )
 from flet_core import TextField
+
 from data_store import DataStore
 
 
@@ -62,9 +65,6 @@ class Sidebar(UserControl):
     def build(self):
         self.view = Container(
             content=Column([
-                Row([
-                    Text("Workspace"),
-                ]),
                 # divider
                 Container(
                     bgcolor=colors.BLACK26,
@@ -82,7 +82,15 @@ class Sidebar(UserControl):
                     alignment=alignment.center_right,
                     width=220
                 ),
-                self.bottom_nav_rail
+                self.bottom_nav_rail,
+                # divider
+                Container(
+                    bgcolor=colors.BLACK26,
+                    border_radius=border_radius.all(30),
+                    height=1,
+                    alignment=alignment.center_right,
+                    width=220
+                ),
             ], tight=True),
             padding=padding.all(15),
             margin=margin.all(0),
@@ -106,19 +114,22 @@ class Sidebar(UserControl):
             self.bottom_nav_rail.destinations.append(
                 NavigationRailDestination(
                     label_content=Row([
-                        TextField(
-                            value=b.board_name,
-                            hint_text=b.board_name,
-                            text_size=12,
-                            read_only=True,
-                            on_focus=self.board_name_focus,
-                            on_blur=self.board_name_blur,
-                            border=InputBorder("none"),
-                            height=50,
-                            width=150,
-                            text_align=TextAlign("start"),
-                            data=i
+                        TextButton(
+                            text=b.board_name
                         )
+                        # TextField(
+                        #     value=b.board_name,
+                        #     hint_text=b.board_name,
+                        #     text_size=12,
+                        #     read_only=True,
+                        #     on_focus=self.board_name_focus,
+                        #     on_blur=self.board_name_blur,
+                        #     border=InputBorder("none"),
+                        #     height=50,
+                        #     width=150,
+                        #     text_align=TextAlign("start"),
+                        #     data=i
+                        # )
                     ]),
                     label=b.board_name,
                     selected_icon=icons.CHEVRON_RIGHT_ROUNDED,

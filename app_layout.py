@@ -19,7 +19,8 @@ from flet import (
     PopupMenuItem,
     alignment,
     border_radius,
-    border
+    border,
+    MaterialState
 )
 from data_store import DataStore
 from Sidebar import Sidebar
@@ -45,15 +46,19 @@ class AppLayout(Row):
                         ),
                         Container(
                             TextButton(
-                                "Добавить новую группу",
+                                "Добавить группу",
                                 icon=icons.ADD,
                                 on_click=self.app.add_board,
                                 style=ButtonStyle(
-                                    bgcolor={
-                                        "": colors.BLUE_200,
-                                        "hovered": colors.BLUE_400,
+                                    color={
+                                        MaterialState.HOVERED: colors.with_opacity(1, "#22afc0"),
+                                        MaterialState.DEFAULT: colors.with_opacity(1, "#075667")
                                     },
-                                    shape={"": RoundedRectangleBorder(radius=3)},
+                                    bgcolor={
+                                        MaterialState.HOVERED: colors.with_opacity(1, "#075667"),
+                                        MaterialState.DEFAULT: colors.with_opacity(1, "#22afc0")
+                                    },
+                                    shape={"": RoundedRectangleBorder(radius=30)},
                                 ),
                             ),
                             padding=padding.only(right=50, top=15),
@@ -141,6 +146,7 @@ class AppLayout(Row):
         e.update()
 
     def set_board_view(self, e, i):
+        self.store.get_boards()[i].initialize_board(e.page.window_width)
         self.active_view = self.store.get_boards()[i]
         self.sidebar.bottom_nav_rail.selected_index = i
         self.sidebar.top_nav_rail.selected_index = None

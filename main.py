@@ -1,20 +1,16 @@
-from board import Board
-from app_layout import AppLayout
+import os.path
 import uuid
-import win32api
-from win32api import GetSystemMetrics
+import time
+
+import flet
 from flet import (
     app,
-    AlertDialog,
     AppBar,
-    Column,
     Container,
-    ElevatedButton,
     Page,
     Row,
     TemplateRoute,
     Text,
-    TextField,
     UserControl,
     View,
     colors,
@@ -24,12 +20,15 @@ from flet import (
     theme,
     IconButton,
     Image,
-    MainAxisAlignment,
-    AppView
 )
+from win32api import GetSystemMetrics
+
+from app_layout import AppLayout
+from board import Board
+from dataXML import DataXML
 from data_store import DataStore
 from memory_store import InMemoryStore
-from dataXML import DataXML
+from ui.create_board_dialog import CreateBoardDialog
 
 
 class LauncherApp(UserControl):
@@ -57,7 +56,8 @@ class LauncherApp(UserControl):
             actions=[
                 Container(
                     content=Row([
-                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK, on_click=lambda e: page.window_maximized),
+                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK_SHARP, on_click=lambda e: page.window_minimized),
+                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK_SHARP, on_click=lambda e: page.window_maximized),
                         IconButton(icon=icons.CLOSE, on_click=lambda e: page.window_close()),
                     ]),
                     margin=margin.only(left=50, right=25),
@@ -116,50 +116,8 @@ class LauncherApp(UserControl):
         e.page.update()
 
     def add_board(self, e):
-        def close_dlg(event):
-            if (hasattr(event.control, "text") and not event.control.text == "Закрыть") or (
-                    type(event.control) is TextField and event.control.value != ""
-            ):
-                unique_id = uuid.uuid4()
-                self.dataXML.add_group(unique_id, dialog_text.value)
-                self.create_new_board(unique_id, dialog_text.value)
-            dialog.open = False
-            event.page.update()
-
-        def textfield_change(event):
-            if dialog_text.value == "":
-                create_button.disabled = True
-            else:
-                create_button.disabled = False
-            event.page.update()
-
-        dialog_text = TextField(
-            label="Название группы", on_submit=close_dlg, on_change=textfield_change
-        )
-        create_button = ElevatedButton(
-            text="Создать", bgcolor=colors.BLUE_200, on_click=close_dlg, disabled=True
-        )
-        dialog = AlertDialog(
-            title=Text("Введите название для вашей группы"),
-            content=Column(
-                [
-                    dialog_text,
-                    Row(
-                        [
-                            ElevatedButton(text="Закрыть", on_click=close_dlg),
-                            create_button,
-                        ],
-                        alignment=MainAxisAlignment.SPACE_BETWEEN,
-                    ),
-                ],
-                tight=True,
-            ),
-            on_dismiss=lambda dismiss: print("Modal dialog dismissed!"),
-        )
-        e.page.dialog = dialog
-        dialog.open = True
-        e.page.update()
-        dialog_text.focus()
+        dialog = CreateBoardDialog(self, self.dataXML)
+        dialog.init_dialog(e.page)
 
     def create_new_board(self, unique_id, board_name):
         new_board = Board(self, self.store, unique_id, board_name, self.page, self.dataXML)
@@ -176,23 +134,29 @@ class LauncherApp(UserControl):
 
 
 def main(page: Page):
-    page.title = "Flet Launcher App"
-    # page.window_frameless = True
-    # page.window_resizable = True
-    page.window_full_screen = True
+    page.title = "Лаунчер"
+    page.theme_mode = flet.ThemeMode("light")
+    # page.window_full_screen = True
     page.padding = 0
+
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
     page.window_width = GetSystemMetrics(0)
     page.window_height = GetSystemMetrics(1)
-    # page.window_maximized = True
-    print(page.window_width)
-    print(page.window_height)
+    page.window_maximized = True
+
+    if not os.path.exists('assets'):
+        os.mkdir('assets')
+        os.mkdir('assets/resized_image')
+
+    start = time.time()
     application = LauncherApp(page, InMemoryStore(), DataXML())
     page.add(application)
     page.update()
     application.initialize()
+    end = time.time()
+    print(end - start)
 
 
 app(target=main, assets_dir="../assets")

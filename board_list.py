@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING
 import subprocess
+from typing import TYPE_CHECKING
 
 # from dataXML import DataXML
 if TYPE_CHECKING:
@@ -17,7 +17,6 @@ from flet import (
     PopupMenuItem,
     Container,
     TextButton,
-    TextField,
     icons,
     border_radius,
     border,
@@ -26,22 +25,14 @@ from flet import (
     Image,
     TextThemeStyle,
     TextAlign,
-    TextOverflow,
     ButtonStyle,
     MaterialState,
     BoxShadow,
     Offset,
     ShadowBlurStyle,
-    Stack,
-    FilePickerResultEvent,
-    FilePicker,
-    ElevatedButton,
-    AlertDialog,
-    Column,
-    MainAxisAlignment
+    Stack
 )
 from data_store import DataStore
-from dataXML import DataXML
 
 
 class BoardList(UserControl):
@@ -94,14 +85,39 @@ class BoardList(UserControl):
                         PopupMenuButton(
                             items=[
                                 PopupMenuItem(
-                                    content=Text(value="Редактировать", style=TextThemeStyle("labelMedium"),
-                                                 text_align=TextAlign("center"), color=colors.BLACK),
-                                    on_click=self.edit_launch),
+                                    content=Text(
+                                        value="Редактировать",
+                                        style=TextThemeStyle("labelMedium"),
+                                        text_align=TextAlign("center"),
+                                        color=colors.BLACK,
+                                        bgcolor=colors.BLACK
+                                    ),
+                                    on_click=self.edit_launch,
+
+                                ),
                                 PopupMenuItem(),
                                 PopupMenuItem(
-                                    content=Text(value="Удалить", style=TextThemeStyle("labelMedium"),
-                                                 text_align=TextAlign("center"), color=colors.BLACK),
+                                    content=Text(
+                                        value="Переместить в...",
+                                        style=TextThemeStyle("labelMedium"),
+                                        text_align=TextAlign("center"),
+                                        color=colors.BLACK),),
+                                PopupMenuItem(),
+                                PopupMenuItem(
+                                    content=Text(
+                                        value="Копировать в...",
+                                        style=TextThemeStyle("labelMedium"),
+                                        text_align=TextAlign("center"),
+                                        color=colors.BLACK),),
+                                PopupMenuItem(),
+                                PopupMenuItem(
+                                    content=Text(
+                                        value="Удалить",
+                                        style=TextThemeStyle("labelMedium"),
+                                        text_align=TextAlign("center"),
+                                        color=colors.RED),
                                     on_click=self.delete_list),
+
                             ],
 
                         ),
@@ -190,17 +206,17 @@ class BoardList(UserControl):
         to_index = i.index(e.control.data)
         from_index = i.index(src.content.data)
         i[to_index], i[from_index] = i[from_index], i[to_index]
-        self.inner_list.border = border.all(2, colors.BLACK12)
+        self.inner_list.border = border.all(2, colors.with_opacity(1, "#22afc0"))
         self.board.update()
         self.update()
 
     def list_will_drag_accept(self, e):
         if e.data == "true":
-            self.inner_list.border = border.all(2, colors.BLACK)
+            self.inner_list.border = border.all(3, colors.with_opacity(1, "#22afc0"))
         self.update()
 
     def list_drag_leave(self, e):
-        self.inner_list.border = border.all(2, colors.BLACK12)
+        self.inner_list.border = border.all(0)
         self.update()
 
     def delete_list(self, e):
