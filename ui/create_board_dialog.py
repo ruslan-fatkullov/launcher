@@ -29,7 +29,7 @@ class CreateBoardDialog:
                     [
                         ft.Row(
                             [
-                                ft.Text("Введите название", size=24),
+                                ft.Text("Введите название", size=24, font_family="MyFont"),
                                 ft.IconButton(
                                     ft.icons.CLOSE,
                                     on_click=self.close_dlg,

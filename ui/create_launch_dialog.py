@@ -23,10 +23,33 @@ class CreateLaunchDialog:
         self.image_path = ft.Text()
 
         self.launch_name = ft.TextField(label="Название лаунча",
-                                        on_submit=self.close_dlg, on_change=self.textfield_change)
+                                        label_style=ft.TextStyle(
+                                            color=ft.colors.GREY_800,
+                                            size=18,
+                                            font_family="Roboto"
+                                        ),
+                                        on_submit=self.close_dlg,
+                                        on_change=self.textfield_change,
+                                        border=ft.InputBorder.OUTLINE,
+                                        border_radius=ft.border_radius.all(8),
+                                        filled=True,
+                                        border_width=0.2,
+                                        border_color=ft.colors.GREY_800,
+                                        bgcolor=ft.colors.WHITE,
+                                        focused_bgcolor=ft.colors.WHITE, )
         self.launch_description = ft.TextField(label="Описание лаунча (необязательно)",
-                                               on_submit=self.close_dlg, on_change=self.textfield_change,
-                                               multiline=True, min_lines=6)
+                                               label_style=ft.TextStyle(
+                                                   color=ft.colors.GREY_800,
+                                                   size=18,
+                                                   font_family="Roboto"
+                                               ),
+                                               on_submit=self.close_dlg,
+                                               border_width=0.2,
+                                               border=ft.InputBorder.OUTLINE,
+                                               border_radius=ft.border_radius.all(8),
+                                               on_change=self.textfield_change,
+                                               multiline=True,
+                                               min_lines=6)
 
         self.create_button = ft.ElevatedButton(
             text="Создать", bgcolor=ft.colors.BLUE_200, on_click=self.close_dlg, disabled=True)
@@ -35,31 +58,35 @@ class CreateLaunchDialog:
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.Row([
-                            ft.Text("Новый лаунч", size=32),
-                            ft.IconButton(ft.icons.CLOSE, on_click=self.close_dlg)
-                        ]),
+                        ft.Stack([
+                            ft.Text("Новый лаунч", size=32, bottom=20),
+                            ft.IconButton(ft.icons.CLOSE, on_click=self.close_dlg, bottom=20, right=0)
+                        ], height=80),
                         ft.Container(content=self.launch_name,
                                      padding=ft.padding.symmetric(horizontal=5)),
                         ft.Container(content=self.launch_description,
                                      padding=ft.padding.symmetric(horizontal=5)),
                         ft.Row([
-                            ft.Icon(ft.icons.FILE_OPEN, color=ft.colors.BLUE_200),
-                            ft.ElevatedButton("Выберете запускаемый файл",
-                                              on_click=lambda _: self.file_picker.pick_files(allow_multiple=False)),
+                            ft.TextButton(content=ft.Row([
+                                ft.Icon(ft.icons.FILE_UPLOAD, color=ft.colors.BLUE_200),
+                                ft.Text("Выберите запускаемый файл"),
+                            ]), on_click=lambda _: self.file_picker.pick_files(allow_multiple=False)),
                             self.selected_files
                         ]),
                         self.file_picker,
                         ft.Row([
-                            ft.Icon(ft.icons.IMAGE, color=ft.colors.BLUE_200),
-                            ft.ElevatedButton("Выберете изображение",
-                                              on_click=lambda _: self.image_picker.pick_files(allow_multiple=False)),
+                            ft.TextButton(content=ft.Row([
+                                ft.Icon(ft.icons.IMAGE, color=ft.colors.BLUE_200),
+                                ft.Text("Выберите изображение")
+                            ]), on_click=lambda _: self.image_picker.pick_files(allow_multiple=False)),
                             self.selected_image
                         ]),
                         self.image_picker,
                         ft.Row([
-                            ft.ElevatedButton(
-                                text="Закрыть", on_click=self.close_dlg),
+                            ft.OutlinedButton(
+                                text="Закрыть",
+                                on_click=self.close_dlg,
+                            ),
                             self.create_button
                         ], alignment=ft.MainAxisAlignment("spaceBetween")),
                     ],
@@ -68,10 +95,11 @@ class CreateLaunchDialog:
                     spacing=10
                 ),
                 bgcolor=ft.colors.WHITE,
-                padding=ft.padding.all(34)
+                padding=ft.padding.all(34),
+                border_radius=ft.border_radius.all(5)
             ),
             on_dismiss=lambda dismiss: print("Modal dialog dismissed!"),
-            shape=ft.RoundedRectangleBorder(radius=0.0),
+            shape=ft.RoundedRectangleBorder(radius=100.0),
             content_padding=ft.padding.only(0, 0, 0, -30)
         )
 

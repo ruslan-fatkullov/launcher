@@ -12,14 +12,13 @@ from flet import (
     icons,
     padding,
     margin,
+    animation,
     NavigationRailLabelType,
     BoxShadow,
     ShadowBlurStyle,
     Offset,
-    InputBorder,
-    TextAlign,
-    ListView,
-    FloatingActionButton,
+    Text,
+    Stack,
     TextButton
 )
 from flet_core import TextField
@@ -38,7 +37,7 @@ class Sidebar(UserControl):
         self.page = page
         self.top_nav_items = [
             NavigationRailDestination(
-                label_content=Text("Все группы"),
+                label_content=Text("Все группы", font_family="MyFont", size=18),
                 label="Boards",
                 icon=icons.FOLDER,
                 selected_icon=icons.FOLDER_OPEN
@@ -64,47 +63,53 @@ class Sidebar(UserControl):
 
     def build(self):
         self.view = Container(
-            content=Column([
-                # divider
-                Container(
-                    bgcolor=colors.BLACK26,
-                    border_radius=border_radius.all(30),
-                    height=1,
-                    alignment=alignment.center_right,
-                    width=220
+                content=Column([
+                    # divider
+                    Container(
+                        bgcolor=colors.BLACK26,
+                        border_radius=border_radius.all(30),
+                        height=1,
+                        alignment=alignment.center_right,
+                        width=220
+                    ),
+                    self.top_nav_rail,
+                    # divider
+                    Container(
+                        bgcolor=colors.BLACK26,
+                        border_radius=border_radius.all(30),
+                        height=1,
+                        alignment=alignment.center_right,
+                        width=220
+                    ),
+                    self.bottom_nav_rail,
+                    # divider
+                    Container(
+                        bgcolor=colors.BLACK26,
+                        border_radius=border_radius.all(30),
+                        height=1,
+                        alignment=alignment.center_right,
+                        width=220
+                    ),
+                ], tight=True),
+                padding=padding.all(15),
+                margin=margin.all(0),
+                width=250,
+                bgcolor=colors.GREY_200,
+                shadow=BoxShadow(
+                    spread_radius=0,
+                    blur_radius=15,
+                    color=colors.BLACK,
+                    offset=Offset(0, 0),
+                    blur_style=ShadowBlurStyle.OUTER
                 ),
-                self.top_nav_rail,
-                # divider
-                Container(
-                    bgcolor=colors.BLACK26,
-                    border_radius=border_radius.all(30),
-                    height=1,
-                    alignment=alignment.center_right,
-                    width=220
-                ),
-                self.bottom_nav_rail,
-                # divider
-                Container(
-                    bgcolor=colors.BLACK26,
-                    border_radius=border_radius.all(30),
-                    height=1,
-                    alignment=alignment.center_right,
-                    width=220
-                ),
-            ], tight=True),
-            padding=padding.all(15),
-            margin=margin.all(0),
-            width=250,
-            bgcolor=colors.GREY_200,
-            shadow=BoxShadow(
-                spread_radius=0,
-                blur_radius=15,
-                color=colors.BLACK,
-                offset=Offset(0, 0),
-                blur_style=ShadowBlurStyle.OUTER
+                on_hover=self.hide_sidebar,
             )
-        )
+
         return self.view
+
+    # тут сделать раскрытие сайдбара
+    def hide_sidebar(self, e):
+        print(f"hide {e.control}")
 
     def sync_board_destinations(self):
         boards = self.store.get_boards()
@@ -114,8 +119,10 @@ class Sidebar(UserControl):
             self.bottom_nav_rail.destinations.append(
                 NavigationRailDestination(
                     label_content=Row([
-                        TextButton(
-                            text=b.board_name
+                        Text(
+                            b.board_name,
+                            font_family="MyFont",
+                            size=15
                         )
                         # TextField(
                         #     value=b.board_name,

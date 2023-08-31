@@ -48,7 +48,7 @@ class LauncherApp(UserControl):
         self.appbar = AppBar(
             leading=Image(src='assets/application_logo.png'),
             leading_width=300,
-            title=Text(f"Лаунчер", font_family="Roboto", size=32),
+            title=Text(f"Лаунчер", font_family="MyFont", size=32),
             center_title=True,
             toolbar_height=105,
             bgcolor=colors.with_opacity(1, "#222c36"),
@@ -129,9 +129,6 @@ class LauncherApp(UserControl):
         self.store.remove_board(e.control.data)
         self.layout.set_all_boards_view(e.page)
 
-    # def setNewWidth(self, board):
-    #     board.resize(self.page.window_width, self.page.window_height)
-
 
 def main(page: Page):
     page.title = "Лаунчер"
@@ -141,7 +138,7 @@ def main(page: Page):
 
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
-    page.fonts = {"Pacifico": "Pacifico-Regular.ttf"}
+    page.fonts = {"MyFont": "./fonts/20011.ttf"}
     page.window_width = GetSystemMetrics(0)
     page.window_height = GetSystemMetrics(1)
     page.window_maximized = True

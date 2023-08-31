@@ -7,8 +7,10 @@ from flet import (
     Container,
     padding,
     TextButton,
+    Icon,
     icons,
     ButtonStyle,
+    IconButton,
     colors,
     RoundedRectangleBorder,
     Text,
@@ -40,14 +42,25 @@ class AppLayout(Row):
                 Row(
                     [
                         Container(
-                            Text(value="Все группы", style=TextThemeStyle("headlineMedium")),
+                            Text(
+                                value="Все группы",
+                                style=TextThemeStyle("headlineMedium"),
+                                font_family="MyFont",
+                                size=32
+                            ),
                             expand=True,
                             padding=padding.only(top=15),
                         ),
                         Container(
-                            TextButton(
-                                "Добавить группу",
-                                icon=icons.ADD,
+                            IconButton(
+                                content=Row([
+                                    Icon(icons.ADD),
+                                    Text(
+                                        "Добавить",
+                                        font_family="MyFont"
+                                    )
+
+                                ]),
                                 on_click=self.app.add_board,
                                 style=ButtonStyle(
                                     color={
@@ -92,7 +105,11 @@ class AppLayout(Row):
                     content=Row(
                         [
                             Container(
-                                content=Text(value=b.board_name),
+                                content=Text(
+                                    value=b.board_name,
+                                    font_family="MyFont",
+                                    size=20
+                                ),
                                 data=b,
                                 expand=True,
                                 padding=padding.only(left=10),

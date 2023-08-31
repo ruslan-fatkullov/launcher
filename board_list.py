@@ -1,5 +1,6 @@
 import subprocess
 from typing import TYPE_CHECKING
+from math import pi
 
 # from dataXML import DataXML
 if TYPE_CHECKING:
@@ -30,7 +31,12 @@ from flet import (
     BoxShadow,
     Offset,
     ShadowBlurStyle,
-    Stack
+    Stack,
+    Column,
+    Alignment,
+    animation,
+    transform,
+    IconButton
 )
 from data_store import DataStore
 
@@ -46,7 +52,6 @@ class BoardList(UserControl):
         self.image = None
         self.view = None
         self.inner_list = None
-        self.end_indicator = None
         self.edit_field = None
         self.board_list_id = next(BoardList.id_counter)
         self.store: DataStore = store
@@ -56,131 +61,95 @@ class BoardList(UserControl):
         self.desc = description
         self.file_path = file_path
         self.image_path = image_path
+        self.title_view = Text(
+            self.title,
+            font_family="MyFont",
+            size=19,
+            color=colors.WHITE,
+            top=15,
+            left=15
+        )
+        self.title_container = Container(
+            content=Stack([
+                self.title_view,
+                # self.popupmenu
+            ]),
+            padding=padding.all(5),
+            bgcolor=colors.with_opacity(1, "#222c36"),
+            animate_opacity=animation.Animation(duration=200),
+            opacity=0,
+            left=0,
+            top=0,
+            right=0,
+            height=60
+        )
+        self.image = Image(
+            src=self.image_path
+        )
+        self.launch_button = Container(
+            content=TextButton(
+                content=Row([Icon(icons.PLAY_ARROW), Text("Запуск", size=18, font_family="MyFont")]),
+                on_click=self.play_launch,
+                style=ButtonStyle(
+                    color=colors.with_opacity(1, "#075667")
+                )),
+            bottom=0,
+            left=0,
+            right=0,
+            height=60,
+            bgcolor=colors.with_opacity(1, "#22afc0"),
+            border_radius=border_radius.all(0),
+            opacity=0,
+            animate_opacity=animation.Animation(duration=150),
+
+        )
+        self.action_buttons = Container(
+            content=Row([
+                IconButton(icons.EDIT, bgcolor=colors.GREY_200, scale=0.9, on_click=self.edit_launch),
+                IconButton(icons.COPY, bgcolor=colors.GREY_200, scale=0.9),
+                IconButton(
+                    icons.DELETE_OUTLINE,
+                    bgcolor=colors.GREY_200,
+                    scale=0.9,
+                    on_click=self.delete_list,
+                    style=ButtonStyle(
+                        color=colors.RED,
+                    )),
+            ]),
+            opacity=0,
+            top=80,
+            left=25,
+            right=0,
+            animate_opacity=animation.Animation(duration=150)
+        )
+
+    def tale_hover(self, e):
+
+        if self.title_container.opacity == 1:
+            self.title_container.opacity = 0
+            self.inner_list.scale = 1
+            self.launch_button.opacity = 0
+            self.action_buttons.opacity = 0
+        else:
+            self.title_container.opacity = 1
+            self.inner_list.scale = 1.05
+            self.launch_button.opacity = 1
+            self.action_buttons.opacity = 1
+        self.launch_button.update()
+        self.title_container.update()
+        self.inner_list.update()
 
     def build(self):
-        self.end_indicator = Container(
-            bgcolor=colors.BLACK26,
-            border_radius=border_radius.all(0),
-            height=3,
-            width=200,
-            opacity=0.0
-        )
-        self.my_header = Container(
-            Stack(
-                controls=[
-                    Container(
-                        content=Text(self.title, color=colors.with_opacity(1, "#ffffff")),
-                        bgcolor=colors.with_opacity(1, "#075667"),
-                        padding=padding.all(10),
-                        border_radius=border_radius.all(5),
-                        shadow=BoxShadow(
-                            spread_radius=0,
-                            blur_radius=5,
-                            color=colors.BLACK26,
-                            offset=Offset(5, 5),
-                            blur_style=ShadowBlurStyle.NORMAL
-                        )
-                    ),
-                    Container(
-                        PopupMenuButton(
-                            items=[
-                                PopupMenuItem(
-                                    content=Text(
-                                        value="Редактировать",
-                                        style=TextThemeStyle("labelMedium"),
-                                        text_align=TextAlign("center"),
-                                        color=colors.BLACK,
-                                        bgcolor=colors.BLACK
-                                    ),
-                                    on_click=self.edit_launch,
-
-                                ),
-                                PopupMenuItem(),
-                                PopupMenuItem(
-                                    content=Text(
-                                        value="Переместить в...",
-                                        style=TextThemeStyle("labelMedium"),
-                                        text_align=TextAlign("center"),
-                                        color=colors.BLACK),),
-                                PopupMenuItem(),
-                                PopupMenuItem(
-                                    content=Text(
-                                        value="Копировать в...",
-                                        style=TextThemeStyle("labelMedium"),
-                                        text_align=TextAlign("center"),
-                                        color=colors.BLACK),),
-                                PopupMenuItem(),
-                                PopupMenuItem(
-                                    content=Text(
-                                        value="Удалить",
-                                        style=TextThemeStyle("labelMedium"),
-                                        text_align=TextAlign("center"),
-                                        color=colors.RED),
-                                    on_click=self.delete_list),
-
-                            ],
-
-                        ),
-                        right=0,
-                        bgcolor=colors.WHITE,
-                        border_radius=50,
-                        shadow=BoxShadow(
-                            spread_radius=0,
-                            blur_radius=5,
-                            color=colors.BLACK26,
-                            offset=Offset(5, 5),
-                            blur_style=ShadowBlurStyle.NORMAL
-                        )
-                    )
-
-                ],
-            ),
-            top=15,
-            left=10,
-            right=10
-        )
         self.inner_list = Container(
             content=Stack([
-                Image(
-                    src=self.image_path,
-                    opacity=1,
-                    fit=ImageFit.FILL,
-                ),
-                self.my_header,
-                Container(
-                    content=TextButton(
-                        content=Row([Icon(icons.PLAY_ARROW), Text("Запуск")]),
-                        on_click=self.play_launch,
-                        style=ButtonStyle(
-                            color={
-                                MaterialState.HOVERED: colors.with_opacity(1, "#22afc0"),
-                                MaterialState.DEFAULT: colors.with_opacity(1, "#075667")
-                            },
-                            bgcolor={
-                                MaterialState.HOVERED: colors.with_opacity(1, "#075667"),
-                                MaterialState.DEFAULT: colors.with_opacity(1, "#22afc0")
-                            },
-                        )),
-                    bottom=10,
-                    left=15,
-                    shadow=BoxShadow(
-                        spread_radius=0,
-                        blur_radius=5,
-                        color=colors.BLACK26,
-                        offset=Offset(5, 5),
-                        blur_style=ShadowBlurStyle.NORMAL
-                    ),
-                    border_radius=border_radius.all(0)
-                )
-
+                self.image,
+                self.title_container,
+                self.launch_button,
+                self.action_buttons
             ]),
-            shadow=BoxShadow(
-                spread_radius=0,
-                blur_radius=5,
-                color=colors.BLACK26,
-                offset=Offset(5, 5),
-                blur_style=ShadowBlurStyle.NORMAL
-            )
+            on_hover=self.tale_hover,
+            scale=1,
+            animate_scale=animation.Animation(duration=150),
         )
         self.view = DragTarget(
             group="items",
