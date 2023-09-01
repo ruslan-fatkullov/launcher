@@ -29,6 +29,7 @@ from board_list import BoardList
 from dataXML import DataXML
 from data_store import DataStore
 from ui.create_launch_dialog import CreateLaunchDialog
+from ui.copy_launch_dialog import CopyLaunchDialog
 
 
 class Board(UserControl):
@@ -59,13 +60,13 @@ class Board(UserControl):
             child_aspect_ratio=1.0,
             spacing=15,
             run_spacing=15,
-            padding=padding.only(0, 10, 0, 0),
-            width=GetSystemMetrics(0) - 270,
+            padding=padding.only(10, 10, 10, 0),
+            width=GetSystemMetrics(0) - 330,
         )
         self.list_grid.controls = self.board_lists
 
     def initialize_board(self, width):
-        self.list_grid.width = width - 290
+        self.list_grid.width = width - 330
         self.board_lists = [
             self.add_list_button
         ]
@@ -206,7 +207,7 @@ class Board(UserControl):
         launch_name.focus()
 
     def resize(self, width, height):
-        self.list_grid.width = width - 270
+        self.list_grid.width = width - 330
         self.list_grid.height = height - 95
         self.list_grid.update()
         self.view.update()
@@ -238,3 +239,7 @@ class Board(UserControl):
         print(system_path)
         show_path = f'{system_path}/assets/resized_image/{launcher_id}.png'
         return show_path
+
+    def copy_launch(self, launch):
+        dialog = CopyLaunchDialog(self, launch, self.dataXML, self.store)
+        dialog.initialize_dialog(self.page)

@@ -22,7 +22,10 @@ from flet import (
     alignment,
     border_radius,
     border,
-    MaterialState
+    MaterialState,
+    Image,
+    Stack,
+    Divider
 )
 from data_store import DataStore
 from Sidebar import Sidebar
@@ -102,49 +105,91 @@ class AppLayout(Row):
         self.all_boards_view.controls[-1] = Row(
             [
                 Container(
-                    content=Row(
-                        [
-                            Container(
-                                content=Text(
-                                    value=b.board_name,
-                                    font_family="MyFont",
-                                    size=20
-                                ),
-                                data=b,
-                                expand=True,
-                                padding=padding.only(left=10),
-                                on_click=self.board_click,
-                                height=150,
-                                alignment=alignment.center
+                    Stack([
+                        Container(
+                            content=Image(
+                                src="folder5.png"
                             ),
-                            Container(
-                                content=PopupMenuButton(
-                                    items=[
-                                        PopupMenuItem(
-                                            content=Text(
-                                                value="Удалить",
-                                                style=TextThemeStyle("labelMedium"),
-                                                text_align=TextAlign("center"),
-                                            ),
-                                            on_click=self.app.delete_board,
-                                            data=b,
+                            width=170,
+                            height=170
+                        ),
+                        Text(
+                            b.board_name,
+                            left=15,
+                            width=140,
+                            bottom=30,
+                            font_family="MyFont",
+                            size=18,
+                            text_align='center'
+                        ),
+                        Container(
+                            content=PopupMenuButton(
+                                items=[
+                                    PopupMenuItem(
+                                        content=Text(
+                                            value="Удалить",
+                                            style=TextThemeStyle("labelMedium"),
+                                            text_align=TextAlign("center"),
                                         ),
-                                    ]
-                                ),
-                                padding=padding.only(left=10),
-                                border_radius=border_radius.all(3),
+                                        on_click=self.app.delete_board,
+                                        data=b,
+                                    ),
+                                ]
                             ),
-                        ],
-                        alignment=MainAxisAlignment("spaceBetween"),
-                    ),
-                    border=border.all(1, colors.BLACK38),
-                    border_radius=border_radius.all(5),
-                    bgcolor=colors.WHITE60,
-                    padding=padding.all(10),
-                    width=250,
-                    height=150,
+                            padding=padding.only(left=10),
+                            border_radius=border_radius.all(3),
+                            right=0,
+                            top=45,
+                        ),
+                    ]),
+                    on_click=self.board_click,
                     data=b,
+                    on_hover=self.hover_folder
                 )
+                # Container(
+                #     content=Row(
+                #         [
+                #             Container(
+                #                 content=Text(
+                #                     value=b.board_name,
+                #                     font_family="MyFont",
+                #                     size=20
+                #                 ),
+                #                 data=b,
+                #                 expand=True,
+                #                 padding=padding.only(left=10),
+                #                 on_click=self.board_click,
+                #                 height=150,
+                #                 alignment=alignment.center
+                #             ),
+                #             Container(
+                #                 content=PopupMenuButton(
+                #                     items=[
+                #                         PopupMenuItem(
+                #                             content=Text(
+                #                                 value="Удалить",
+                #                                 style=TextThemeStyle("labelMedium"),
+                #                                 text_align=TextAlign("center"),
+                #                             ),
+                #                             on_click=self.app.delete_board,
+                #                             data=b,
+                #                         ),
+                #                     ]
+                #                 ),
+                #                 padding=padding.only(left=10),
+                #                 border_radius=border_radius.all(3),
+                #             ),
+                #         ],
+                #         alignment=MainAxisAlignment("spaceBetween"),
+                #     ),
+                #     border=border.all(1, colors.BLACK38),
+                #     border_radius=border_radius.all(5),
+                #     bgcolor=colors.WHITE60,
+                #     padding=padding.all(10),
+                #     width=150,
+                #     height=150,
+                #     data=b,
+                # )
                 for b in self.store.get_boards()
             ],
             wrap=True,
@@ -176,3 +221,10 @@ class AppLayout(Row):
                 e.page.width, e.page.height
             )
         e.page.update()
+
+    def hover_folder(self, e):
+        pass
+
+    def delete_board(self, board):
+        print(board.control)
+        self.app.delete_board(board)

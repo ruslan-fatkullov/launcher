@@ -1,6 +1,6 @@
 import subprocess
-from typing import TYPE_CHECKING
 from math import pi
+from typing import TYPE_CHECKING
 
 # from dataXML import DataXML
 if TYPE_CHECKING:
@@ -84,7 +84,8 @@ class BoardList(UserControl):
             height=60
         )
         self.image = Image(
-            src=self.image_path
+            src=self.image_path,
+            border_radius=border_radius.all(15)
         )
         self.launch_button = Container(
             content=TextButton(
@@ -106,7 +107,7 @@ class BoardList(UserControl):
         self.action_buttons = Container(
             content=Row([
                 IconButton(icons.EDIT, bgcolor=colors.GREY_200, scale=0.9, on_click=self.edit_launch),
-                IconButton(icons.COPY, bgcolor=colors.GREY_200, scale=0.9),
+                IconButton(icons.COPY, bgcolor=colors.GREY_200, scale=0.9, on_click=self.copy_launch),
                 IconButton(
                     icons.DELETE_OUTLINE,
                     bgcolor=colors.GREY_200,
@@ -149,7 +150,15 @@ class BoardList(UserControl):
             ]),
             on_hover=self.tale_hover,
             scale=1,
+            border_radius=border_radius.all(15),
             animate_scale=animation.Animation(duration=150),
+            shadow=BoxShadow(
+                spread_radius=0,
+                blur_radius=15,
+                color=colors.BLACK,
+                offset=Offset(0, 0),
+                blur_style=ShadowBlurStyle.OUTER
+            ),
         )
         self.view = DragTarget(
             group="items",
@@ -196,3 +205,8 @@ class BoardList(UserControl):
 
     def play_launch(self, e):
         subprocess.Popen(('start', "", self.file_path), shell=True)
+
+    # copy launch
+    def copy_launch(self, e):
+        self.board.copy_launch(self)
+

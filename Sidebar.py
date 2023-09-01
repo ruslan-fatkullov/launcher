@@ -3,7 +3,6 @@ from flet import (
     Column,
     Container,
     Row,
-    Text,
     NavigationRail,
     NavigationRailDestination,
     alignment,
@@ -12,16 +11,15 @@ from flet import (
     icons,
     padding,
     margin,
-    animation,
     NavigationRailLabelType,
     BoxShadow,
     ShadowBlurStyle,
     Offset,
     Text,
-    Stack,
-    TextButton
+    TextButton,
+    PopupMenuButton,
+    PopupMenuItem
 )
-from flet_core import TextField
 
 from data_store import DataStore
 
@@ -31,6 +29,7 @@ class Sidebar(UserControl):
     def __init__(self, app_layout, store: DataStore, page):
         super().__init__()
 
+        self.popup = None
         self.view = None
         self.store: DataStore = store
         self.app_layout = app_layout
@@ -63,84 +62,93 @@ class Sidebar(UserControl):
 
     def build(self):
         self.view = Container(
-                content=Column([
-                    # divider
-                    Container(
-                        bgcolor=colors.BLACK26,
-                        border_radius=border_radius.all(30),
-                        height=1,
-                        alignment=alignment.center_right,
-                        width=220
-                    ),
-                    self.top_nav_rail,
-                    # divider
-                    Container(
-                        bgcolor=colors.BLACK26,
-                        border_radius=border_radius.all(30),
-                        height=1,
-                        alignment=alignment.center_right,
-                        width=220
-                    ),
-                    self.bottom_nav_rail,
-                    # divider
-                    Container(
-                        bgcolor=colors.BLACK26,
-                        border_radius=border_radius.all(30),
-                        height=1,
-                        alignment=alignment.center_right,
-                        width=220
-                    ),
-                ], tight=True),
-                padding=padding.all(15),
-                margin=margin.all(0),
-                width=250,
-                bgcolor=colors.GREY_200,
-                shadow=BoxShadow(
-                    spread_radius=0,
-                    blur_radius=15,
-                    color=colors.BLACK,
-                    offset=Offset(0, 0),
-                    blur_style=ShadowBlurStyle.OUTER
+            content=Column([
+                # divider
+                Container(
+                    bgcolor=colors.BLACK26,
+                    border_radius=border_radius.all(30),
+                    height=1,
+                    alignment=alignment.center_right,
+                    width=300
                 ),
-                on_hover=self.hide_sidebar,
-            )
+                self.top_nav_rail,
+                # divider
+                Container(
+                    bgcolor=colors.BLACK26,
+                    border_radius=border_radius.all(30),
+                    height=1,
+                    alignment=alignment.center_right,
+                    width=300
+                ),
+                self.bottom_nav_rail,
+                # divider
+                Container(
+                    bgcolor=colors.BLACK26,
+                    border_radius=border_radius.all(30),
+                    height=1,
+                    alignment=alignment.center_right,
+                    width=300
+                ),
+            ], tight=True),
+            padding=padding.all(15),
+            margin=margin.all(0),
+            width=300,
+            bgcolor=colors.GREY_200,
+            shadow=BoxShadow(
+                spread_radius=0,
+                blur_radius=15,
+                color=colors.BLACK,
+                offset=Offset(0, 0),
+                blur_style=ShadowBlurStyle.OUTER
+            ),
+            on_hover=self.hide_sidebar,
+        )
 
         return self.view
 
     # тут сделать раскрытие сайдбара
     def hide_sidebar(self, e):
-        print(f"hide {e.control}")
+        pass
+        # print(f"hide {e.control}")
 
     def sync_board_destinations(self):
+
         boards = self.store.get_boards()
         self.bottom_nav_rail.destinations = []
         for i in range(len(boards)):
             b = boards[i]
+            self.popup = PopupMenuButton(
+                items=[PopupMenuItem(
+                    text="Delete",
+                    on_click=self.delete_board,
+                    data=b
+                )]
+            )
             self.bottom_nav_rail.destinations.append(
                 NavigationRailDestination(
-                    label_content=Row([
-                        Text(
-                            b.board_name,
-                            font_family="MyFont",
-                            size=15
-                        )
-                        # TextField(
-                        #     value=b.board_name,
-                        #     hint_text=b.board_name,
-                        #     text_size=12,
-                        #     read_only=True,
-                        #     on_focus=self.board_name_focus,
-                        #     on_blur=self.board_name_blur,
-                        #     border=InputBorder("none"),
-                        #     height=50,
-                        #     width=150,
-                        #     text_align=TextAlign("start"),
-                        #     data=i
-                        # )
-                    ]),
+                    label_content=Column(
+                        [
+                            Row([
+                                Text(
+                                    b.board_name,
+                                    font_family="MyFont",
+                                    width=140,
+                                    size=15
+                                ),
+                                self.popup,
+
+                            ]),
+                            Container(
+                                bgcolor=colors.BLACK26,
+                                border_radius=border_radius.all(30),
+                                height=1,
+                                alignment=alignment.center_right,
+                                width=170,
+                            ),
+
+                        ]),
                     label=b.board_name,
-                    selected_icon=icons.CHEVRON_RIGHT_ROUNDED,
-                    icon=icons.ARROW_RIGHT,
+
                 )
             )
         self.view.update()
@@ -178,3 +186,7 @@ class Sidebar(UserControl):
         e.control.border = "outline"
         e.control.update()
         self.view.update()
+
+    def delete_board(self, e):
+        print(e.control)
+        self.app_layout.delete_board(e)

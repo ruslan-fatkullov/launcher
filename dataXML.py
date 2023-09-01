@@ -81,3 +81,6 @@ class DataXML:
                         launch.find('image').text = launch_image_path
                         tree = ElTree.ElementTree(self.root)
                         tree.write("data.xml")
+
+    def copy_launch(self):
+        pass

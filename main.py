@@ -46,7 +46,7 @@ class LauncherApp(UserControl):
             IconButton(icon=icons.CLOSE)
         ]
         self.appbar = AppBar(
-            leading=Image(src='assets/application_logo.png'),
+            leading=Image(src='esvoLogo.png'),
             leading_width=300,
             title=Text(f"Лаунчер", font_family="MyFont", size=32),
             center_title=True,
@@ -56,8 +56,6 @@ class LauncherApp(UserControl):
             actions=[
                 Container(
                     content=Row([
-                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK_SHARP, on_click=lambda e: page.window_minimized),
-                        IconButton(icon=icons.CHECK_BOX_OUTLINE_BLANK_SHARP, on_click=lambda e: page.window_maximized),
                         IconButton(icon=icons.CLOSE, on_click=lambda e: page.window_close()),
                     ]),
                     margin=margin.only(left=50, right=25),
@@ -135,7 +133,7 @@ def main(page: Page):
     page.theme_mode = flet.ThemeMode("light")
     # page.window_full_screen = True
     page.padding = 0
-
+    page.window_title_bar_hidden = True
     page.theme = theme.Theme(font_family="Verdana")
     page.theme.page_transitions.windows = "cupertino"
     page.fonts = {"MyFont": "./fonts/20011.ttf"}
